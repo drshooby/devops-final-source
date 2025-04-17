@@ -1,8 +1,0 @@
-go 1.21.3
-
-use (
-	./backend/billing-service
-	./backend/reporting-service
-	./backend/search-service
-	./backend/user-service
-)
