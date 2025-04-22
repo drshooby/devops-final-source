@@ -1,0 +1,136 @@
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
+    color: #1f2937;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  h1.brand {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  
+  p.tagline {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+  }
+  
+  .login-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    width: 320px;
+  }
+  
+  .login-box h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+  
+  .login-form input {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  
+  .login-form button {
+    width: 100%;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .login-form button[type="submit"] {
+    background-color: #2563eb;
+    color: white;
+  }
+  
+  .login-form button[type="submit"]:hover {
+    background-color: #1e40af;
+  }
+  
+  .login-form .link {
+    background: none;
+    color: #2563eb;
+    text-decoration: underline;
+    font-size: 0.85rem;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-box {
+    background: white;
+    color: black;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 320px;
+    position: relative;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
+  .modal-form input {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  .modal-form button {
+    width: 100%;
+    padding: 0.6rem;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .modal-form button:hover {
+    background: #15803d;
+  }
