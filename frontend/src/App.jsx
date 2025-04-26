@@ -1,59 +1,51 @@
-import { useState, useEffect } from 'react'
-import LoginForm from './components/LoginForm'
-import RegisterModal from './components/RegisterModal'
+import { useEffect, useState } from 'react';
+import { fetchPhotos, addPhoto, deletePhoto, fetchMetrics } from './api';
+import PhotoForm from './PhotoForm';
+import PhotoList from './PhotoList';
+import ProgressBar from './ProgressBar';
 
 export default function App() {
-  const [showModal, setShowModal] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(null) // null = loading, true/false = result
+  const [photos, setPhotos] = useState([]);
+  const [metrics, setMetrics] = useState({
+    count: 0,
+    nextMilestone: 1,
+    progress: 0,
+  });
 
   useEffect(() => {
-    async function checkAuth() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/verify`, {
-          credentials: 'include', // sends cookies
-        })
+    loadPhotos();
+    loadMetrics();
+  }, []);
 
-        if (res.ok) {
-          const user = await res.json()
-          console.log('[Authenticated]', user)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (err) {
-        console.error('Auth check failed:', err)
-        setIsAuthenticated(false)
-      }
-    }
-
-    checkAuth()
-  }, [])
-
-  // Show nothing while checking auth
-  if (isAuthenticated === null) {
-    return <div>Checking credentials...</div>
+  async function loadPhotos() {
+    const data = await fetchPhotos();
+    setPhotos(data);
   }
 
-  // If not logged in, show login form
-  if (!isAuthenticated) {
-    return (
-      <div className="app-container">
-        <h1 className="brand">iDropThings</h1>
-        <p className="tagline">continuous delivery...usually</p>
-        <LoginForm onRegisterClick={() => setShowModal(true)} />
-        {showModal && <RegisterModal onClose={() => setShowModal(false)} />}
-      </div>
-    )
+  async function loadMetrics() {
+    const data = await fetchMetrics();
+    setMetrics(data);
   }
 
-  // If logged in, show the app (for now, just a placeholder)
+  async function handleAdd(photo) {
+    await addPhoto(photo);
+    await loadPhotos();
+    await loadMetrics();
+  }
+
+  async function handleDelete(id) {
+    await deletePhoto(id);
+    await loadPhotos();
+    await loadMetrics();
+  }
+
   return (
-    <div className="app-container">
-      <h1 className="brand">Welcome to iDropThings</h1>
-      <p className="tagline">You’re logged in and probably ready to drop.</p>
-      <button onClick={() => alert("This could lead to the fake dashboard")}>
-        Go to Dashboard
-      </button>
+    <div className="container">
+      <h1>Photo Summary App</h1>
+      <p>{metrics.count} photos uploaded! (Next milestone: {metrics.nextMilestone} photos)</p>
+      <ProgressBar progress={metrics.progress} />
+      <PhotoForm onAdd={handleAdd} />
+      <PhotoList photos={photos} onDelete={handleDelete} />
     </div>
-  )
+  );
 }
