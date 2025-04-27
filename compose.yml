@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17
-    container_name: idt-postgres
+    container_name: photo-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: user
@@ -17,21 +17,52 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - idt-network
+      - photo-network
 
-  frontend:
+  list-service:
+    build:
+      context: ./backend/list-service
+    container_name: list-service
+    ports:
+      - "8001:8001"
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      ENVIRONMENT: ${ENVIRONMENT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - photo-network
+
+  metric-service:
+    build:
+      context: ./backend/metric-service
+    container_name: metric-service
+    ports:
+      - "8002:8002"
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      ENVIRONMENT: ${ENVIRONMENT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - photo-network
+
+  web:
     build:
       context: ./frontend
-    container_name: idt-frontend
+    container_name: photo-web
     ports:
       - "8080:80"
-    restart: unless-stopped
+    depends_on:
+      - list-service
     networks:
-      - idt-network
+      - photo-network
 
 volumes:
   postgres_data:
 
 networks:
-  idt-network:
+  photo-network:
     driver: bridge

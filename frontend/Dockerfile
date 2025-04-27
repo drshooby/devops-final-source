@@ -1,32 +1,25 @@
-# Stage 1: Build Vite app
-FROM node:slim AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Install deps
+# Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy source code
+# Copy app source
 COPY . .
 
-# Build for production
+# Build production static files
 RUN npm run build
 
-# Stage 2: Serve with Nginx
-FROM nginx:1.27-alpine-slim
+# Keep the output in the image
+FROM nginx:1.27-alpine
 
-# Remove default nginx static files
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy built app to nginx
+# Copy built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Optional: custom nginx config (for single-page app routing)
+# Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]

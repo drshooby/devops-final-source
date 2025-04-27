@@ -1,13 +1,10 @@
-const API_BASE_URL = window.appConfig.API_BASE_URL
-
 export async function fetchPhotos() {
-    alert(API_BASE_URL)
-  const res = await fetch(`${API_BASE_URL}/api/photos`);
+  const res = await fetch(`/api/list/photos`);
   return res.json();
 }
 
 export async function addPhoto(photo) {
-  await fetch(`${API_BASE_URL}/api/photos`, {
+  await fetch(`/api/list/photos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(photo),
@@ -15,12 +12,12 @@ export async function addPhoto(photo) {
 }
 
 export async function deletePhoto(id) {
-  await fetch(`${API_BASE_URL}/api/photos/${id}`, {
+  await fetch(`/api/list/photos/${id}`, {
     method: 'DELETE'
   });
 }
 
 export async function fetchMetrics() {
-  const res = await fetch(`${API_BASE_URL}/api/metrics`);
+  const res = await fetch(`/api/metrics/progress`);
   return res.json();
 }
