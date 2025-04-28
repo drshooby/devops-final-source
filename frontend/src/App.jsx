@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchPhotos, addPhoto, deletePhoto, fetchMetrics } from './api';
+import { fetchPhotos, addPhoto, deletePhoto, fetchMetrics, sendEmail } from './api';
 import PhotoForm from './PhotoForm';
 import PhotoList from './PhotoList';
 import ProgressBar from './ProgressBar';
@@ -31,6 +31,23 @@ export default function App() {
     await addPhoto(photo);
     await loadPhotos();
     await loadMetrics();
+
+    const updatedMetrics = await fetchMetrics();
+
+    if (updatedMetrics.count === updatedMetrics.nextMilestone) {
+      const email = prompt("Enter your email to celebrate the milestone!");
+      const name = prompt("Enter your name!");
+
+      if (email && name) {
+        try {
+          await sendEmail(email, name, updatedMetrics.count);
+          alert("Congrats email has been sent!");
+        } catch (error) {
+          console.error("Failed to send email:", error);
+          alert("Failed to send milestone email.");
+        }
+      }
+    }
   }
 
   async function handleDelete(id) {

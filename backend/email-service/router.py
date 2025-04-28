@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 import aiosmtplib
 from email.message import EmailMessage
 
-from schemas import EmailSchema
-from . import config
+from schemas import EmailRequest
+import config
 
 router = APIRouter(prefix="/api/email")
 
@@ -12,16 +12,19 @@ async def health_check():
     return {"message": "Hello from email service!"}
 
 @router.post("/send")
-async def send_email(email: EmailSchema, background_tasks: BackgroundTasks):
-    background_tasks.add_task(_send_email_task, email)
+async def send_email(request: EmailRequest, background_tasks: BackgroundTasks):
+    background_tasks.add_task(_send_email_task, request)
     return {"message": "Email is being sent in background."}
 
-async def _send_email_task(email: EmailSchema):
+async def _send_email_task(request: EmailRequest):
+    subject = f"Milestone Achieved!"
+    body = f"Congrats {request.name} on getting us to {request.photo_count} photos!"
+
     message = EmailMessage()
     message["From"] = config.FROM_EMAIL
-    message["To"] = email.to_email
-    message["Subject"] = email.subject
-    message.set_content(email.body)
+    message["To"] = request.to_email
+    message["Subject"] = subject
+    message.set_content(body)
 
     try:
         await aiosmtplib.send(
