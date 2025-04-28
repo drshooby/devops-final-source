@@ -73,6 +73,8 @@ services:
       - "8080:80"
     depends_on:
       - list-service
+      - email-service
+      - metric-service
     networks:
       - photo-network
 

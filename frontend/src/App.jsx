@@ -3,6 +3,7 @@ import { fetchPhotos, addPhoto, deletePhoto, fetchMetrics, sendEmail } from './a
 import PhotoForm from './PhotoForm';
 import PhotoList from './PhotoList';
 import ProgressBar from './ProgressBar';
+import EmailModal from './EmailModal';
 
 export default function App() {
   const [photos, setPhotos] = useState([]);
@@ -11,6 +12,7 @@ export default function App() {
     nextMilestone: 1,
     progress: 0,
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadPhotos();
@@ -30,23 +32,13 @@ export default function App() {
   async function handleAdd(photo) {
     await addPhoto(photo);
     await loadPhotos();
-    await loadMetrics();
 
+    const milestone = metrics.nextMilestone
     const updatedMetrics = await fetchMetrics();
+    setMetrics(updatedMetrics);
 
-    if (updatedMetrics.count === updatedMetrics.nextMilestone) {
-      const email = prompt("Enter your email to celebrate the milestone!");
-      const name = prompt("Enter your name!");
-
-      if (email && name) {
-        try {
-          await sendEmail(email, name, updatedMetrics.count);
-          alert("Congrats email has been sent!");
-        } catch (error) {
-          console.error("Failed to send email:", error);
-          alert("Failed to send milestone email.");
-        }
-      }
+    if (updatedMetrics.count === milestone) {
+      setIsModalOpen(true);
     }
   }
 
@@ -56,6 +48,17 @@ export default function App() {
     await loadMetrics();
   }
 
+  async function handleEmailSubmit(name, email) {
+    try {
+      await sendEmail(email, name, metrics.count);
+      alert("Congrats email has been sent!");
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to send email:", error);
+      alert("Failed to send milestone email.");
+    }
+  }
+
   return (
     <div className="container">
       <h1>Photo Summary App</h1>
@@ -63,6 +66,13 @@ export default function App() {
       <ProgressBar progress={metrics.progress} />
       <PhotoForm onAdd={handleAdd} />
       <PhotoList photos={photos} onDelete={handleDelete} />
+
+      <EmailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleEmailSubmit}
+        milestoneCount={metrics.count}
+      />
     </div>
   );
 }
