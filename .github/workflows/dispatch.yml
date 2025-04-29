@@ -1,4 +1,4 @@
-name: Source Push - Trigger ECR Setup
+name: Confirm ECR Ready
 
 on:
   workflow_dispatch:
@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Trigger ECR Setup Workflow
       uses: peter-evans/repository-dispatch@v3
       with:
