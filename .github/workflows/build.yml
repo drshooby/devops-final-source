@@ -9,6 +9,41 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
-    - name: Test
-      run: echo "hi"
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials via OIDC
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: us-west-2
+
+    - name: Generate image tag
+      run: echo "IMAGE_TAG=$(date +%Y%m%d-%H%M)-qa" >> $GITHUB_ENV
+
+    - name: Build, tag, and push images to ECR for QA
+      env:
+        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      run: |
+        SERVICES=("frontend" "list-service" "email-service" "metric-service")
+        REGION="us-west-2"
+
+        for SERVICE in "${SERVICES[@]}"; do
+          echo "Building $SERVICE 🚧"
+          docker build -t $SERVICE ./services/$SERVICE
+
+          REPO_URI="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SERVICE"
+          FULL_TAG="$REPO_URI:$IMAGE_TAG"
+
+          echo "Tagging as $FULL_TAG 🏷️"
+          docker tag $SERVICE $FULL_TAG
+
+          echo "Pushing $FULL_TAG 🚀"
+          docker push $FULL_TAG
+        done
