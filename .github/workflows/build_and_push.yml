@@ -41,7 +41,7 @@ jobs:
         ls -a
         
     - name: Make build script executable
-      run: chmod +x ./build-and-push.sh
+      run: chmod +x build-and-push.sh
       
     - name: Build, tag, and push images
       env:
