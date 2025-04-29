@@ -1,1 +1,19 @@
+name: Source Push - Trigger ECR Setup
 
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-ecr-setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Trigger ECR Setup Workflow
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: drshooby/devops-final-infra
+        event-type: trigger-ecr-setup
