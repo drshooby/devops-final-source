@@ -4,3 +4,11 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [ready-to-build]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Test
+      run: echo "hi"
