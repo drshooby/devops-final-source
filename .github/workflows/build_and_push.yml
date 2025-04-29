@@ -26,8 +26,15 @@ jobs:
     - name: Generate image tag
       run: echo "IMAGE_TAG=$(date +%Y%m%d-%H%M)-qa" >> $GITHUB_ENV
 
-    - name: Set up Docker
-      uses: docker/setup-docker-action@v4
+    - name: Install Docker
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+        sudo systemctl start docker
+        sudo usermod -aG docker $USER
+
+    - name: Confirm Docker Exists
+      run: docker --version
 
     - name: Docker login to ECR
       env:
