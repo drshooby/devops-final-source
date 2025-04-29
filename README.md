@@ -1,5 +1,3 @@
-Devops Final Source Code Repo
-
 # DevOps Final – Source Code Repo 🧪
 
 ## 🛠️ Build Strategy
