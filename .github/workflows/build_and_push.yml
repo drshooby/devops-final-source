@@ -1,4 +1,4 @@
-name: Build and Push ECR
+name: Build for ECR
 
 on:
   workflow_dispatch:
@@ -26,24 +26,38 @@ jobs:
     - name: Generate image tag
       run: echo "IMAGE_TAG=$(date +%Y%m%d-%H%M)-qa" >> $GITHUB_ENV
 
-    - name: Build, tag, and push images to ECR for QA
+    - name: Docker login to ECR
+      env:
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      run: |
+        aws ecr get-login-password --region us-west-2 | \
+        docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com"
+
+    - name: Build, tag, and push images
       env:
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
-        ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       run: |
-        SERVICES=("frontend" "list-service" "email-service" "metric-service")
+        declare -A SERVICES=(
+          ["frontend"]="frontend"
+          ["list-service"]="backend/list-service"
+          ["email-service"]="backend/email-service"
+          ["metric-service"]="backend/metric-service"
+        )
+
         REGION="us-west-2"
 
-        for SERVICE in "${SERVICES[@]}"; do
-          echo "Building $SERVICE 🚧"
-          docker build -t $SERVICE ./services/$SERVICE
-
-          REPO_URI="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SERVICE"
+        for SERVICE in "${!SERVICES[@]}"; do
+          PATH="${SERVICES[$SERVICE]}"
+          REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SERVICE"
           FULL_TAG="$REPO_URI:$IMAGE_TAG"
 
-          echo "Tagging as $FULL_TAG 🏷️"
+          echo "🚧 Building $SERVICE at $PATH"
+          docker build -t $SERVICE "$PATH"
+
+          echo "🏷️ Tagging as $FULL_TAG"
           docker tag $SERVICE $FULL_TAG
 
-          echo "Pushing $FULL_TAG 🚀"
+          echo "🚀 Pushing $FULL_TAG"
           docker push $FULL_TAG
         done
