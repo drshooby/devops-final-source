@@ -1,4 +1,4 @@
-name: Build for ECR
+name: Build and Push to ECR
 on:
   workflow_dispatch:
   repository_dispatch:
