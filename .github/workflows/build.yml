@@ -1,0 +1,6 @@
+name: Build for ECR
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ready-to-build]
