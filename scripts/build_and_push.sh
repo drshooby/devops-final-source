@@ -13,7 +13,7 @@ REPO="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$SERVICE_NAME"
 VERSION="$(cat VERSION.txt)"                 # e.g. 1.0.3-QA
 DATE="$(date +%Y%m%d)"                       # e.g. 20250430
 
-FULL_TAG="${SERVICE_NAME}-${VERSION}-${DATE}"
+FULL_TAG="${VERSION}-${DATE}"
 
 echo "🚧 Building $SERVICE_NAME from $DIR"
 docker buildx build --platform linux/amd64 -t "$REPO:$FULL_TAG" "$DIR"
