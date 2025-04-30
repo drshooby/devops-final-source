@@ -1,11 +1,6 @@
 name: Build and Push to ECR
 
 on:
-  # 03:00 AM PT (10:00 UTC)
-  schedule:
-    - cron: '0 10 * * *'
-
-  # Manual “Run workflow”
   workflow_dispatch:
     inputs:
       build_all:
@@ -15,16 +10,26 @@ on:
         type: choice
         options: ["false", "true"]
 
-env:
-  REGION: us-west-2
-  SERVICES_JSON: '["frontend","list-service","email-service","metric-service"]'
-
 jobs:
-  detect-changes:
+  build_and_push_all:
+    if: ${{ github.event.inputs.build_all == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make build script executable
+        run: chmod +x ./build_and_push.sh
+      - name: Build and Push Services
+        run: |
+          services="frontend list-service email-service metric-service"
+          for service in $services; do
+            echo "Building $service..."
+            # your script here
+          done
+
+  detect_changes:
     if: ${{ github.event.inputs.build_all != 'true' }}
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set.outputs.matrix }}
+      changed_dirs: ${{ steps.export.outputs.changed_dirs }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,12 +38,24 @@ jobs:
         id: changed-files
         with:
           dir_names: "true"
-
-      - name: List all changed directories
-        env:
-          ALL_CHANGED_DIRS: ${{ steps.changed-files.outputs.all_changed_files }} # works for dirs
+      - name: Export changed dirs
+        id: export
         run: |
-          for dir in ${ALL_CHANGED_DIRS}; do
-            echo "$dir was changed"
-          done
+          echo "changed_dirs=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
 
+  build_and_push_with_change:
+    if: ${{ github.event.inputs.build_all != 'true' && needs.detect-changes.outputs.changed_dirs != '' }}
+    needs: detect_changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make build script executable
+        run: chmod +x ./build_and_push.sh
+      - name: Build and Push Services
+        env:
+          CHANGED_DIRS: ${{ needs.detect-changes.outputs.changed_dirs }}
+        run: |
+          echo "Building only changed services: $CHANGED_DIRS"
+          for dir in $CHANGED_DIRS; do
+            echo "Building $dir..."
+            # script here
+          done
