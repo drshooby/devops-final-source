@@ -19,7 +19,7 @@ jobs:
         run: chmod +x ./build_and_push.sh
       - name: Build and Push Services
         run: |
-          services="frontend list-service email-service metric-service"
+          services="frontend backend/list-service backend/email-service backend/metric-service"
           for service in $services; do
             ./build_and_push.sh service x x 
           done
