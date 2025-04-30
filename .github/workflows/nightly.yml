@@ -41,7 +41,7 @@ jobs:
         run: |
           services="frontend backend/list-service backend/email-service backend/metric-service"
           for dir in $services; do
-            ./scripts/build_and_push.sh "$dir" "$AWS_ID"
+            ./scripts/build_and_push.sh "$dir" "$AWS_ID" "qa"
           done
 
   detect_changes:
@@ -93,5 +93,5 @@ jobs:
         run: |
           echo "Building only changed services: $CHANGED_DIRS"
           for dir in $CHANGED_DIRS; do
-            ./scripts/build_and_push.sh "$dir" "$AWS_ID"
+            ./scripts/build_and_push.sh "$dir" "$AWS_ID" "qa"
           done
