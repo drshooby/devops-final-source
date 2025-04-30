@@ -21,8 +21,7 @@ jobs:
         run: |
           services="frontend list-service email-service metric-service"
           for service in $services; do
-            echo "Building $service..."
-            # your script here
+            ./build_and_push.sh service x x 
           done
 
   detect_changes:
