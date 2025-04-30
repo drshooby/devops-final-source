@@ -18,7 +18,7 @@ module.exports = {
       [
         '@semantic-release/exec',
         {
-          prepareCmd: "echo '${nextRelease.version}-${process.env.ENVIRONMENT}' > VERSION.txt",
+          prepareCmd: "echo '${nextRelease.version}' > VERSION.txt",
         },
       ],
       [
