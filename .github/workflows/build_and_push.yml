@@ -19,7 +19,6 @@ env:
   REGION: us-west-2
   SERVICES_JSON: '["frontend","list-service","email-service","metric-service"]'
 
-# ────────── 1) detect what changed (skipped when build_all=true) ──────────
 jobs:
   detect-changes:
     if: ${{ github.event.inputs.build_all != 'true' }}
@@ -28,7 +27,6 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: tj-actions/changed-files@v44
         id: chg
         with:
@@ -46,67 +44,5 @@ jobs:
             | sed -E 's#^(frontend)$#\1#;s#^backend/##;s#/.+$##')
           jq -n --arg s "$CHANGED" '$s|split("\n")|map(select(. != ""))' > tmp.json
           echo "matrix=$(cat tmp.json)" >> $GITHUB_OUTPUT
+          echo "::notice title=Matrix::$(cat tmp.json)"
 
-# ────────── 2a) build EVERY service (manual build_all=true) ──────────
-  build_all:
-    if: ${{ github.event.inputs.build_all == 'true' }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        svc: ${{ fromJson(env.SERVICES_JSON) }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configure AWS creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.REGION }}
-      - uses: docker/setup-buildx-action@v3
-      - name: ECR login
-        env: 
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: |
-          aws ecr get-login-password --region ${{ env.REGION }} | \
-          docker login --username AWS --password-stdin \
-            "$AWS_ACCOUNT_ID.dkr.ecr.${{ env.REGION }}.amazonaws.com"
-      - name: Build & push ${{ matrix.svc }}
-        env:
-          TAG: ${{ github.sha }}
-          AWS_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: |
-          ./scripts/build-and-push.sh "${{ matrix.svc }}" "$TAG" "$AWS_ID" "${{ env.REGION }}"
-
-# ────────── 2b) build ONLY changed services (nightly & manual default) ──────────
-build_changed:
-    # run only when:
-    #   • the run is NOT build_all=true  AND
-    #   • detect-changes actually found something
-    if: ${{ github.event.inputs.build_all != 'true' && needs.detect-changes.outputs.matrix != '[]' }}
-    needs: detect-changes
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        svc: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configure AWS creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.REGION }}
-      - uses: docker/setup-buildx-action@v3
-      - name: ECR login
-        env: 
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: |
-          aws ecr get-login-password --region ${{ env.REGION }} | \
-          docker login --username AWS --password-stdin \
-            "$AWS_ACCOUNT_ID.dkr.ecr.${{ env.REGION }}.amazonaws.com"
-      - name: Build & push ${{ matrix.svc }}
-        env:
-          TAG: ${{ github.sha }}
-          AWS_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: |
-          ./scripts/build-and-push.sh "${{ matrix.svc }}" "$TAG" "$AWS_ID" "${{ env.REGION }}"
