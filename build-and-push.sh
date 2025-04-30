@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Usage: ./scripts/build-and-push.sh DIR_PATH TAG AWS_ACCOUNT_ID [REGION]
+# Usage: ./build_and_push.sh DIR_PATH TAG AWS_ACCOUNT_ID [REGION]
 set -euo pipefail
 
-DIR="$1"
+DIR="$1"                  # e.g. "backend/email-service"
 TAG="$2"
 ACCOUNT="$3"
 REGION="${4:-us-west-2}"
 
-# Extract the service name from the last part of the directory
-SERVICE_NAME="$(basename "$DIR")"  # e.g., "list-service"
+SERVICE_NAME="$(basename "$DIR")"            # "email-service"
 REPO="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$SERVICE_NAME"
 
 echo "🚧 Building $SERVICE_NAME from $DIR"
