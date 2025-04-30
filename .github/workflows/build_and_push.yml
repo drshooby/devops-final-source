@@ -30,11 +30,7 @@ jobs:
       - uses: tj-actions/changed-files@v44
         id: chg
         with:
-          dir_names: |
-            frontend
-            backend/list-service
-            backend/email-service
-            backend/metric-service
+          dir_names: "frontend backend/list-service backend/email-service backend/metric-service"
 
       - name: Build service list JSON
         id: set
