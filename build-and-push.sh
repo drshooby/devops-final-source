@@ -1,29 +1,20 @@
 #!/usr/bin/env bash
-# scripts/build-and-push.sh  SERVICE_NAME  TAG  AWS_ACCOUNT_ID  [REGION]
+# Usage: ./scripts/build-and-push.sh DIR_PATH TAG AWS_ACCOUNT_ID [REGION]
 set -euo pipefail
 
-SERVICE="$1"
+DIR="$1"
 TAG="$2"
 ACCOUNT="$3"
 REGION="${4:-us-west-2}"
 
-declare -A PATHS=(
-  ["frontend"]="frontend"
-  ["list-service"]="backend/list-service"
-  ["email-service"]="backend/email-service"
-  ["metric-service"]="backend/metric-service"
-)
+# Extract the service name from the last part of the directory
+SERVICE_NAME="$(basename "$DIR")"  # e.g., "list-service"
+REPO="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$SERVICE_NAME"
 
-if [[ -z "${PATHS[$SERVICE]:-}" ]]; then
-  echo "❌ Unknown service: $SERVICE"; exit 1
-fi
-
-DIR="${PATHS[$SERVICE]}"
-REPO="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$SERVICE"
-
-echo "🚧 Building $SERVICE from $DIR"
+echo "🚧 Building $SERVICE_NAME from $DIR"
 docker buildx build --platform linux/amd64 -t "$REPO:$TAG" "$DIR"
 
 echo "📤 Pushing $REPO:$TAG"
 docker push "$REPO:$TAG"
-echo "✅ $SERVICE pushed"
+
+echo "✅ Successfully pushed $SERVICE_NAME:$TAG"
