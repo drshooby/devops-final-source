@@ -1,4 +1,3 @@
-// release.config.js
 module.exports = {
     branches: ['main'],
     plugins: [
@@ -16,6 +15,10 @@ module.exports = {
           assets: [
             { path: 'version.json', label: 'Version JSON' },
           ],
+          failComment: false,  // Disable creation of failure comments
+          failTitle: false,    // Disable creation of failure PRs
+          labels: undefined,   // Don't add labels to issues
+          addReleases: 'bottom',
         },
       ],
       [
