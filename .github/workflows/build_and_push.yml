@@ -27,18 +27,18 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
-      - uses: tj-actions/changed-files@v44
-        id: chg
         with:
-          dir_names: "frontend backend/list-service backend/email-service backend/metric-service"
+          fetch-depth: 0
+      - uses: tj-actions/changed-files@v44
+        id: changed-files
+        with:
+          dir_names: "true"
 
-      - name: Build service list JSON
-        id: set
+      - name: List all changed directories
+        env:
+          ALL_CHANGED_DIRS: ${{ steps.changed-files.outputs.all_changed_files }} # works for dirs
         run: |
-          CHANGED=$(echo "${{ steps.chg.outputs.all_changed_and_modified_files }}" \
-            | tr ' ' '\n' | cut -d/ -f1-2 | sort -u \
-            | sed -E 's#^(frontend)$#\1#;s#^backend/##;s#/.+$##')
-          jq -n --arg s "$CHANGED" '$s|split("\n")|map(select(. != ""))' > tmp.json
-          echo "matrix=$(cat tmp.json)" >> $GITHUB_OUTPUT
-          echo "::notice title=Matrix::$(cat tmp.json)"
+          for dir in ${ALL_CHANGED_DIRS}; do
+            echo "$dir was changed"
+          done
 
