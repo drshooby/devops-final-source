@@ -1,43 +1,29 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+# scripts/build-and-push.sh  SERVICE_NAME  TAG  AWS_ACCOUNT_ID  [REGION]
+set -euo pipefail
 
-# This script builds, tags, and pushes Docker images to ECR
-# Usage: ./build-and-push.sh $IMAGE_TAG $AWS_ACCOUNT_ID
+SERVICE="$1"
+TAG="$2"
+ACCOUNT="$3"
+REGION="${4:-us-west-2}"
 
-IMAGE_TAG=$1
-AWS_ACCOUNT_ID=$2
-REGION="us-west-2"
-
-if [ -z "$IMAGE_TAG" ] || [ -z "$AWS_ACCOUNT_ID" ]; then
-  echo "⚠️ Error: Missing required parameters"
-  echo "Usage: ./build-and-push.sh <IMAGE_TAG> <AWS_ACCOUNT_ID>"
-  exit 1
-fi
-
-# Define services and their paths
-declare -A SERVICES=(
+declare -A PATHS=(
   ["frontend"]="frontend"
   ["list-service"]="backend/list-service"
   ["email-service"]="backend/email-service"
   ["metric-service"]="backend/metric-service"
 )
 
-# Loop through services and build/push each one
-for SERVICE in "${!SERVICES[@]}"; do
-  SERVICE_PATH="${SERVICES[$SERVICE]}"
-  REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SERVICE"
-  FULL_TAG="$REPO_URI:$IMAGE_TAG"
-  
-  echo "🚧 Building $SERVICE at $SERVICE_PATH"
-  docker build -t $SERVICE "$SERVICE_PATH"
-  
-  echo "🏷️ Tagging as $FULL_TAG"
-  docker tag $SERVICE $FULL_TAG
-  
-  echo "🚀 Pushing $FULL_TAG"
-  docker push $FULL_TAG
-  
-  echo "✅ Completed $SERVICE"
-done
+if [[ -z "${PATHS[$SERVICE]:-}" ]]; then
+  echo "❌ Unknown service: $SERVICE"; exit 1
+fi
 
-echo "🎉 All services built and pushed successfully"
+DIR="${PATHS[$SERVICE]}"
+REPO="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$SERVICE"
+
+echo "🚧 Building $SERVICE from $DIR"
+docker buildx build --platform linux/amd64 -t "$REPO:$TAG" "$DIR"
+
+echo "📤 Pushing $REPO:$TAG"
+docker push "$REPO:$TAG"
+echo "✅ $SERVICE pushed"
