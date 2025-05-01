@@ -44,6 +44,13 @@ jobs:
             ./scripts/build_and_push.sh "$dir" "$AWS_ID" "qa"
           done
 
+      - name: Start QA
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: drshooby/devops-final-source
+          event-type: begin-qa
+
   detect_changes:
     if: ${{ github.event.inputs.build_all != 'true' }}
     runs-on: ubuntu-latest
@@ -99,3 +106,10 @@ jobs:
           for dir in $CHANGED_DIRS; do
             ./scripts/build_and_push.sh "$dir" "$AWS_ID" "qa"
           done
+
+      - name: Tell Source Ready To Go
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: drshooby/devops-final-source
+          event-type: begin-qa
