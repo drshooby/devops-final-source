@@ -68,7 +68,7 @@ jobs:
 
   build_and_push_with_change:
     needs: detect_changes
-    if: ${{ github.event.inputs.build_all != 'true' && needs.detect-changes.outputs.changed_dirs != '' }}
+    if: ${{ github.event.inputs.build_all != 'true' && needs.detect_changes.outputs.changed_dirs != '' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
