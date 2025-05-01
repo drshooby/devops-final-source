@@ -67,8 +67,8 @@ jobs:
           echo "changed_dirs=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
 
   build_and_push_with_change:
-    if: ${{ github.event.inputs.build_all != 'true' && needs.detect-changes.outputs.changed_dirs != '' }}
     needs: detect_changes
+    if: ${{ github.event.inputs.build_all != 'true' && needs.detect-changes.outputs.changed_dirs != '' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
