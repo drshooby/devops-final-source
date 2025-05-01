@@ -5,7 +5,7 @@ set -euo pipefail
 DIR="$1"                  # e.g. "backend/email-service"
 ACCOUNT="$2"
 ENVIRONMENT="$3"          # e.g. "qa"
-REGION="${4:-us-west-2}"
+REGION="${4:-us-east-1}"
 
 SERVICE_NAME="$(basename "$DIR")"            # "email-service"
 REPO="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$SERVICE_NAME"
