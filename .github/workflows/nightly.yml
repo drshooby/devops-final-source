@@ -48,7 +48,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT }}
-          repository: drshooby/devops-final-source
+          repository: drshooby/devops-final-infra
           event-type: begin-qa
 
   detect_changes:
@@ -111,5 +111,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT }}
-          repository: drshooby/devops-final-source
+          repository: drshooby/devops-final-infra
           event-type: begin-qa
