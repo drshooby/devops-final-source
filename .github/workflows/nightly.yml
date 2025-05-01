@@ -57,6 +57,10 @@ jobs:
         id: changed-files
         with:
           dir_names: "true"
+      - name: Show what was detected
+        run: |
+          echo "🔍 All changed dirs:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
       - name: Export changed dirs
         id: export
         run: |
