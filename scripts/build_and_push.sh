@@ -4,7 +4,7 @@ set -euo pipefail
 
 DIR="$1"                  # e.g. "backend/email-service"
 ACCOUNT="$2"
-ENVIRONMENT="$3"          # e.g. "qa"
+ENVIRONMENT="$3"          # e.g. "qa", "uat", etc.
 REGION="${4:-us-east-1}"
 
 SERVICE_NAME="$(basename "$DIR")"
@@ -23,11 +23,23 @@ docker buildx build --platform linux/amd64 -t "$REPO:$SORTABLE_TAG" "$DIR"
 echo "📤 Pushing $REPO:$SORTABLE_TAG"
 docker push "$REPO:$SORTABLE_TAG"
 
-# Optional: tag as qa (floating alias for current environment)
-echo "🏷️ Tagging $SERVICE_NAME:$SORTABLE_TAG as $ENVIRONMENT"
-docker tag "$REPO:$SORTABLE_TAG" "$REPO:$ENVIRONMENT"
-docker push "$REPO:$ENVIRONMENT"
+echo "🏷️ Promoting $SERVICE_NAME:$SORTABLE_TAG to $ENVIRONMENT (ECR-native retag)"
+echo "📦 Fetching image manifest for $SORTABLE_TAG"
 
-echo "✅ Successfully pushed:"
+MANIFEST=$(aws ecr batch-get-image \
+  --repository-name "$SERVICE_NAME" \
+  --image-ids imageTag="$SORTABLE_TAG" \
+  --query 'images[].imageManifest' \
+  --output text \
+  --region "$REGION")
+
+echo "🚀 Putting new tag: $ENVIRONMENT -> $SORTABLE_TAG"
+aws ecr put-image \
+  --repository-name "$SERVICE_NAME" \
+  --image-tag "$ENVIRONMENT" \
+  --image-manifest "$MANIFEST" \
+  --region "$REGION"
+
+echo "✅ Successfully pushed and promoted:"
 echo "   • $REPO:$SORTABLE_TAG"
-echo "   • $REPO:$ENVIRONMENT"
+echo "   • $REPO:$ENVIRONMENT (now pointing to $SORTABLE_TAG)"
