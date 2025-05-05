@@ -1,7 +1,7 @@
 def calculate_next_milestone(current_count: int) -> int:
     # milestones 
     if current_count < 1:
-        return 2
+        return 1
     elif current_count < 5:
         return 5
     elif current_count < 12:
